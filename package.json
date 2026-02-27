@@ -3,7 +3,7 @@
   "displayName": "Fahh_Sound_Test Case Failed",
   "description": "This extension plays Fahh Sound when Test case is failed",
   "version": "0.0.1",
-  "publisher": "Kavin Krishnan C",
+  "publisher": "kavinkrishnanc",
   "keywords": ["error", "test", "debug", "sound"],
   "engines": {
     "vscode": "^1.109.0"
