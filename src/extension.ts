@@ -1,26 +1,39 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as cp from 'child_process';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "fahh-sound-test-case-failed" is now active!');
+    const soundPath = path.join(context.extensionPath, 'media', 'fahh.mp3');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('fahh-sound-test-case-failed.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Fahh_Sound_Test Case Failed!');
-	});
+    let lastErrorCount = 0;
 
-	context.subscriptions.push(disposable);
+    vscode.languages.onDidChangeDiagnostics(() => {
+        const diagnostics = vscode.languages.getDiagnostics();
+
+        let errorCount = 0;
+
+        diagnostics.forEach(([uri, diags]) => {
+            errorCount += diags.filter(d => d.severity === vscode.DiagnosticSeverity.Error).length;
+        });
+
+        if (errorCount > lastErrorCount) {
+            playSound(soundPath);
+        }
+
+        lastErrorCount = errorCount;
+    });
 }
 
-// This method is called when your extension is deactivated
+function playSound(filePath: string) {
+    const player =
+        process.platform === 'win32'
+            ? `powershell -c (New-Object Media.SoundPlayer '${filePath}').PlaySync();`
+            : process.platform === 'darwin'
+            ? `afplay "${filePath}"`
+            : `aplay "${filePath}"`;
+
+    cp.exec(player);
+}
+
 export function deactivate() {}
